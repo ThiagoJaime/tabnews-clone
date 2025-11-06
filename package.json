@@ -1,0 +1,26 @@
+{
+  "name": "tabnews-clone",
+  "version": "1.0.0",
+  "description": "projeto do https://curso.dev",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "next dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThiagoJaime/tabnews-clone.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ThiagoJaime/tabnews-clone/issues"
+  },
+  "homepage": "https://github.com/ThiagoJaime/tabnews-clone#readme",
+  "dependencies": {
+    "next": "^13.1.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
