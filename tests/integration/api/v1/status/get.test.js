@@ -1,4 +1,5 @@
-test("Tstar nedpoint de status", async () => {
+test("Testar endpoint de status", async () => {
   const response = await fetch("http://localhost:3000/api/v1/status");
+
   expect(response.status).toBe(200);
 });
