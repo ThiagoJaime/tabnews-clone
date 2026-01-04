@@ -3,6 +3,11 @@ import { join } from "node:path";
 import database from "infra/database";
 
 export default async function migrations(req, res) {
+  const method = req.method;
+  if (!["GET", "POST"].includes(method)) {
+    return res.status(405).end();
+  }
+
   const dbClient = await database.getNewClient();
 
   const objectConfigDefault = {
@@ -14,13 +19,13 @@ export default async function migrations(req, res) {
     migrationsTable: "pgmigrations",
   };
 
-  if (req.method === "GET") {
+  if (method === "GET") {
     const pendingMigrations = await migrationRun(objectConfigDefault);
     await dbClient.end();
     return res.status(200).json(pendingMigrations);
   }
 
-  if (req.method === "POST") {
+  if (method === "POST") {
     const migrations = await migrationRun({
       ...objectConfigDefault,
       dryRun: false,
@@ -34,6 +39,4 @@ export default async function migrations(req, res) {
 
     return res.status(200).json(migrations);
   }
-
-  return res.status(405).end();
 }
