@@ -1,2 +1,2 @@
 # tabnews-clone
-projeto do https://curso.dev
+Construindo conhecimentos sólidos sobre programação
