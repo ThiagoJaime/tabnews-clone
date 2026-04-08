@@ -1,49 +1,54 @@
 import migrationRun from "node-pg-migrate";
 import { join } from "node:path";
 import database from "infra/database";
+import { createRouter } from "next-connect";
+import { onNoMatchHandler, onErrorHandler } from "infra/controller";
 
-export default async function migrations(req, res) {
-  const method = req.method;
-  if (!["GET", "POST"].includes(method)) {
-    return res.status(405).json({
-      error: `Method '${method}' not allowed.`,
-    });
-  }
+const router = createRouter();
 
+router.get(GetHandler).post(PostHandler);
+
+export default router.handler({
+  onNoMatch: onNoMatchHandler,
+  onError: onErrorHandler,
+});
+
+const objectConfigDefault = {
+  dryRun: true,
+  dir: join("infra", "migrations"),
+  direction: "up",
+  verbose: true,
+  migrationsTable: "pgmigrations",
+};
+
+async function GetHandler(req, res) {
   let dbClient;
   try {
     dbClient = await database.getNewClient();
 
-    const objectConfigDefault = {
+    const pendingGetHandler = await migrationRun({
+      ...objectConfigDefault,
       dbClient: dbClient,
-      dryRun: true,
-      dir: join("infra", "migrations"),
-      direction: "up",
-      verbose: true,
-      migrationsTable: "pgmigrations",
-    };
+    });
 
-    if (method === "GET") {
-      const pendingMigrations = await migrationRun(objectConfigDefault);
+    return res.status(200).json(pendingGetHandler);
+  } finally {
+    await dbClient.end();
+  }
+}
 
-      return res.status(200).json(pendingMigrations);
-    }
+async function PostHandler(req, res) {
+  let dbClient;
+  try {
+    dbClient = await database.getNewClient();
 
-    if (method === "POST") {
-      const migrations = await migrationRun({
-        ...objectConfigDefault,
-        dryRun: false,
-      });
+    const PostHandler = await migrationRun({
+      ...objectConfigDefault,
+      dbClient: dbClient,
+      dryRun: false,
+    });
 
-      if (migrations.length > 0) {
-        return res.status(201).json(migrations);
-      }
-
-      return res.status(200).json(migrations);
-    }
-  } catch (error) {
-    console.log("Error: ", error);
-    throw error;
+    return res.status(201).json(PostHandler);
   } finally {
     await dbClient.end();
   }
